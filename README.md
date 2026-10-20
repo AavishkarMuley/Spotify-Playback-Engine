@@ -80,6 +80,3 @@ g++ -std=c++17 main.cpp -o lru_cache
 - [ ] Add key expiration with Time-to-Live (TTL).
 
 ---
-
-## License
-This project is open-source and available under the MIT License.
