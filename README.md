@@ -1,5 +1,9 @@
 # In-Memory LRU Cache System
 
+![C++](https://img.shields.io/badge/Language-C%2B%2B17-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
+![Data Structures](https://img.shields.io/badge/Data%20Structures-HashMap%20%7C%20Doubly%20Linked%20List-orange?style=for-the-badge)
+![Time Complexity](https://img.shields.io/badge/Complexity-O(1)%20Time-brightgreen?style=for-the-badge)
+
 
 A fast, in-memory Least Recently Used (LRU) Cache built in C++. It utilizes a custom Doubly Linked List coupled with a Hash Map (`std::unordered_map`) to deliver strict O(1) time complexity for all key lookups, updates, and evictions, along with an interactive terminal visualizer.
 
