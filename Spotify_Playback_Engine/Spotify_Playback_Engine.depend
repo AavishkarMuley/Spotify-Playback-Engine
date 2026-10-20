@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1792260714 source:c:\users\aavishkar\onedrive\desktop\python coding\c++_practice\spotify playback engine\spotify_playback_engine\main.cpp
+	<iostream>
+	<windows.h>
+	<list>
+	<unordered_map>
+	<fstream>
+	<string>
+
