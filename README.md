@@ -1,26 +1,30 @@
-# In-Memory LRU Cache System
+# Spotify Playback & Playlist Engine (CLI)
 
 ![C++](https://img.shields.io/badge/Language-C%2B%2B17-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
-![Data Structures](https://img.shields.io/badge/Data%20Structures-HashMap%20%7C%20Doubly%20Linked%20List-orange?style=for-the-badge)
-![Time Complexity](https://img.shields.io/badge/Complexity-O(1)%20Time-brightgreen?style=for-the-badge)
+![Data Structures](https://img.shields.io/badge/Data%20Structures-Doubly%20Linked%20List%20%7C%20HashMap-orange?style=for-the-badge)
+![Storage](https://img.shields.io/badge/Storage-File%20I%2FO-blueviolet?style=for-the-badge)
 
-
-A fast, in-memory Least Recently Used (LRU) Cache built in C++. It utilizes a custom Doubly Linked List coupled with a Hash Map (`std::unordered_map`) to deliver strict O(1) time complexity for all key lookups, updates, and evictions, along with an interactive terminal visualizer.
+A console-based Spotify playback queue and playlist management engine implemented in C++. Built using a Doubly Linked List and Hash Map Indexing, it provides smooth track traversal, duplicate prevention, song search, persistent file storage, and a dynamic ad-injection simulation.
 
 ---
 
 ## Architecture & Design
 
-The cache uses a hybrid data structure:
-- **Doubly Linked List (Node)**: Maintains access recency. The node right after `head` represents the Most Recently Used (MRU) item, while the node right before `tail` represents the Least Recently Used (LRU) item. Adding, deleting, and moving nodes occurs in O(1) time via pointer manipulation.
-- **Hash Map (`unordered_map<int, Node*>`):** Provides instant O(1) access to any node in the list by its key.
+The playback engine coordinates playback and playlist state using two core structures:
+1. **Doubly Linked List**:
+   - Represents the active track sequence.
+   - Provides O(1) track skipping (`nextsong()` and `prevsong()`) without re-indexing.
+   - Guarded with sentinel `head` and `tail` nodes to eliminate null-pointer boundary issues.
+2. **Composite Hash Map (`unordered_map<string, Node*>`):**
+   - Keys are generated as `"{Singer}_{SongName}"`.
+   - Prevents duplicate tracks from being added in O(1) time.
+   - Allows targeted song deletion in O(1) time without traversing the entire playlist.
 
 ```
-[Head (MRU)] <---> [Key: 2 | Val: 20] <---> [Key: 1 | Val: 10] <---> [Tail (LRU)]
-       ▲                      ▲
-       │                      │
-    Key: 2 ───────────────────┘
-    (Hash Map Pointer Index)
+                 Current Track
+                       │
+                       ▼
+[Head] <---> [Song 1] <---> [Song 2] <---> [Song 3] <---> [Tail]
 ```
 
 ---
@@ -29,31 +33,49 @@ The cache uses a hybrid data structure:
 
 | Operation | Time Complexity | Space Complexity | Description |
 | :--- | :---: | :---: | :--- |
-| **`get(key)`** | **O(1)** | O(1) | Hash lookup; moves accessed node to MRU position |
-| **`put(key, value)`** | **O(1)** | O(1) | Inserts or updates node; evicts LRU if capacity reached |
-| **Overall Space** | — | **O(C)** | Where C is the maximum configured cache capacity |
+| **`nextsong()` / `prevsong()`** | **O(1)** | O(1) | Immediate pointer traversal to adjacent track |
+| **`addsong()`** | **O(1)** | O(1) | Hash lookup for duplicates + insertion at head |
+| **`deletesong()`** | **O(1)** | O(1) | Hash lookup + node pointer detachment |
+| **`searchsong()`** | **O(N)** | O(1) | Matches query against track titles and artist names |
+| **`saveplaylist()` / `openplaylist()`** | **O(N)** | O(N) | Sequential File I/O to/from disk (`MyPlaylist.txt`) |
 
 ---
 
 ## Features
 
-- **Constant Time Operations**: Guaranteed O(1) performance for both data retrieval and insertion.
-- **Automatic LRU Eviction**: Automatically purges the oldest unaccessed item when the cache limit is exceeded.
-- **Live Terminal Visualizer**: Shows the exact state and order of the cache from `[MRU]` to `[LRU]` in real time after every operation.
-- **Clean Pointer Management**: Uses dummy sentinel head and tail nodes to prevent edge-case pointer errors and memory leaks.
+- **Bidirectional Playback**: Move forward and backward across tracks in constant O(1) time.
+- **Queue Throttling**: Configurable capacity limit with automatic eviction of the oldest added tracks.
+- **Duplicate Prevention**: Rejects duplicate songs instantly using composite key indexing.
+- **Search System**: Case-aware keyword search that displays all matching songs and artists in the playlist.
+- **File Persistence**: Save playlists to disk and reload them in future sessions using C++ File I/O (`fstream`).
+- **Freemium Ad Simulation**: Dynamic ad injection that triggers a promotional banner and delay every 3 songs played.
 
 ---
 
 ## Sample CLI Output
 
 ```text
-==========================
-[MRU] -> |3|30|->|1|10|->|2|20| <- [LRU]
-==========================
-Enter the operation you want to perform
-Enter 1 to insert data
-Enter 2 to get data
-Enter 3 to exit
+=================================================
+             SPOTIFY PLAYBACK ENGINE             
+=================================================
+1. Create playlist
+2. Add song
+3. Delete song
+4. Next song
+5. Previous song
+6. Save playlist
+7. Open playlist
+8. Search song
+9. Exit
+=================================================
+Enter your choice: 4
+
+Playing Next Song:
+Track: Starboy | Artist: The Weeknd
+
+=================================================
+Upgrade to get ad-less music
+=================================================
 ```
 
 ---
@@ -61,26 +83,27 @@ Enter 3 to exit
 ## How to Run
 
 ### Prerequisites
-- A C++17 compatible compiler (`g++`, `clang++`, or MSVC).
+- A C++17 compatible compiler (e.g. MinGW GCC, Clang, or MSVC).
 
 ### Compilation & Execution
 
 ```bash
 # 1. Compile the code
-g++ -std=c++17 main.cpp -o lru_cache
+g++ -std=c++17 main.cpp -o spotify_engine
 
 # 2. Run the executable (Windows)
-.\lru_cache.exe
+.\spotify_engine.exe
 
 # 2. Run the executable (Linux/macOS)
-./lru_cache
+./spotify_engine
 ```
 
 ---
 
 ## Future Improvements
-- [ ] Add thread safety using mutexes (`std::mutex` / `std::shared_mutex`).
-- [ ] Support generic key-value types using C++ templates (`template <typename K, typename V>`).
-- [ ] Add key expiration with Time-to-Live (TTL).
+- [ ] Fisher-Yates algorithm for randomized queue shuffling.
+- [ ] Circular linked list mode for seamless loop playback.
+- [ ] Real audio decoding and playback using audio libraries (such as SFML Audio or miniaudio).
 
 ---
+
